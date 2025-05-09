@@ -1,0 +1,4 @@
+{
+  "extends": "@ghtracker/config/tsconfig",
+  "include": ["src/**/*"]
+}
