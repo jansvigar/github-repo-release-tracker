@@ -7,6 +7,8 @@
     "db:cli": "docker compose exec db psql -U postgres -d github_tracker",
     "db:start": "docker compose up -d db",
     "db:stop": "docker compose down",
+    "db:generate-migrations": "drizzle-kit generate",
+    "db:run-migrations": "drizzle-kit migrate",
     "type-check": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write .",
@@ -15,8 +17,13 @@
     "test:ui": "vitest --ui --coverage.enabled=true",
     "test:coverage": "vitest --coverage"
   },
-  "dependencies": {},
+  "dependencies": {
+    "drizzle-orm": "^0.43.1",
+    "pg": "^8.15.6"
+  },
   "devDependencies": {
-    "@ghtracker/config": "workspace:*"
+    "@ghtracker/config": "workspace:*",
+    "@types/pg": "^8.15.1",
+    "drizzle-kit": "^0.31.1"
   }
 }
