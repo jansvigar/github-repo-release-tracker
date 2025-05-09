@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "db:cli": "docker compose exec db psql -U postgres -d github_tracker",
+    "db:start": "docker compose up -d db",
+    "db:stop": "docker compose down",
     "type-check": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write .",
