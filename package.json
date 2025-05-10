@@ -6,13 +6,12 @@
   "scripts": {
     "dev:web": "pnpm --filter \"@ghtracker/web\" dev",
     "dev:api": "pnpm --filter \"@ghtracker/api\" dev",
+    "dev": "pnpm dev:api & pnpm dev:web",
     "lint": "pnpm -r --stream lint",
     "type-check": "pnpm -r --stream type-check",
     "format": "pnpm -r --stream format",
     "test": "pnpm -r --filter ./apps/** test",
-    "test:coverage": "pnpm -r --filter ./apps/** test:coverage",
-    "install:api": "pnpm --filter=\"@ghtracker/api\" add",
-    "install:web": "pnpm --filter=\"@ghtracker/web\" add"
+    "test:coverage": "pnpm -r --filter ./apps/** test:coverage"
   },
   "keywords": [],
   "author": "",
