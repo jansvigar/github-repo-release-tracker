@@ -64,9 +64,17 @@ Follow these steps from the project root:
 
 6. **Run in development mode**
 
-   ```bash
-   pnpm dev
-   ```
+   - **Backend** (API):
+
+     ```bash
+     pnpm dev:api
+     ```
+
+   - **Frontend** (Web App):
+
+     ```bash
+     pnpm dev:web
+     ```
 
 ---
 

@@ -6,7 +6,6 @@
   "scripts": {
     "dev:web": "pnpm --filter \"@ghtracker/web\" dev",
     "dev:api": "pnpm --filter \"@ghtracker/api\" dev",
-    "dev": "pnpm dev:api & pnpm dev:web",
     "lint": "pnpm -r --stream lint",
     "type-check": "pnpm -r --stream type-check",
     "format": "pnpm -r --stream format",
