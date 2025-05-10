@@ -1,4 +1,7 @@
 {
   "extends": "@ghtracker/config/tsconfig",
+  "compilerOptions": {
+    "outDir": "dist"
+  },
   "include": ["src/**/*"]
 }
