@@ -64,22 +64,3 @@ export const REFRESH_ALL_REPOS = gql`
     }
   }
 `;
-
-export const REFRESH_REPO = gql`
-  mutation RefreshRepo($id: ID!) {
-    refreshRepo(id: $id) {
-      id
-      owner
-      name
-      seen
-      latestRelease {
-        id
-        tagName
-        publishedAt
-        htmlUrl
-        body
-        seen
-      }
-    }
-  }
-`;

@@ -46,7 +46,6 @@ function App() {
   const [refreshAllRepos, { error: refreshError }] = useMutation<RefreshAllData, RefreshAllVars>(
     REFRESH_ALL_REPOS,
     {
-      // update cache instead of refetching
       update(cache, { data }) {
         if (!data) return;
         cache.writeQuery<GetReposData, GetReposVars>({

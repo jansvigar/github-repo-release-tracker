@@ -108,23 +108,6 @@ export const resolvers: IResolvers = {
 
       return repos;
     },
-
-    refreshRepo: async (_, { id }: { id: number }) => {
-      const repo = await db.query.trackedRepositories.findFirst({
-        where: eq(trackedRepositories.id, id),
-      });
-      if (!repo) throw new Error("Repo not found");
-
-      const latest = await fetchLatest(repo.owner, repo.name);
-
-      await db
-        .insert(releases)
-        .values({ repositoryId: repo.id, ...latest })
-        .onConflictDoNothing()
-        .returning();
-
-      return repo;
-    },
   },
 
   TrackedRepository: {
