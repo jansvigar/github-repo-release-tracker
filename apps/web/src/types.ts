@@ -51,3 +51,9 @@ export interface MarkSeenData {
 export interface MarkSeenVars {
   releaseId: string;
 }
+
+export interface RefreshAllData {
+  refreshAllRepos: Repository[];
+}
+
+export type RefreshAllVars = object;

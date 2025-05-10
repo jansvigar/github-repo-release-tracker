@@ -46,13 +46,32 @@ export const MARK_SEEN = gql`
   }
 `;
 
+export const REFRESH_ALL_REPOS = gql`
+  mutation RefreshAllRepos {
+    refreshAllRepos {
+      id
+      owner
+      name
+      latestRelease {
+        id
+        tagName
+        publishedAt
+        htmlUrl
+        body
+        seen
+      }
+      seen
+    }
+  }
+`;
+
 export const REFRESH_REPO = gql`
   mutation RefreshRepo($id: ID!) {
     refreshRepo(id: $id) {
       id
       owner
       name
-      unseen
+      seen
       latestRelease {
         id
         tagName

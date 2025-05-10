@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "releases_repository_tag_unique" ON "releases" USING btree ("repository_id","tag_name");

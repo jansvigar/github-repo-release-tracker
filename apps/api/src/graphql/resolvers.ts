@@ -60,7 +60,9 @@ export const resolvers: IResolvers = {
       await db
         .insert(releases)
         .values({ repositoryId: repo.id, ...latest })
-        .onConflictDoNothing();
+        .onConflictDoNothing({
+          target: [releases.repositoryId, releases.tagName],
+        });
 
       return repo;
     },
@@ -87,6 +89,24 @@ export const resolvers: IResolvers = {
         .where(eq(releases.id, releaseId))
         .returning();
       return row;
+    },
+
+    refreshAllRepos: async () => {
+      const repos = await db.query.trackedRepositories.findMany();
+
+      await Promise.all(
+        repos.map(async (repo) => {
+          const latest = await fetchLatest(repo.owner, repo.name);
+          await db
+            .insert(releases)
+            .values({ repositoryId: repo.id, ...latest })
+            .onConflictDoNothing({
+              target: [releases.repositoryId, releases.tagName],
+            });
+        }),
+      );
+
+      return repos;
     },
 
     refreshRepo: async (_, { id }: { id: number }) => {

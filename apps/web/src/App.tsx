@@ -4,7 +4,13 @@ import { useMutation, useQuery } from "@apollo/client";
 import Header from "@/components/Header";
 import SecondaryBar from "@/components/SecondaryBar";
 import RepoSection from "@/components/RepoSection";
-import { ADD_REPO, DELETE_REPO, GET_REPOS, MARK_SEEN } from "@/graphql/operations";
+import {
+  ADD_REPO,
+  DELETE_REPO,
+  GET_REPOS,
+  MARK_SEEN,
+  REFRESH_ALL_REPOS,
+} from "@/graphql/operations";
 import {
   AddRepoData,
   AddRepoVars,
@@ -14,6 +20,8 @@ import {
   GetReposVars,
   MarkSeenData,
   MarkSeenVars,
+  RefreshAllData,
+  RefreshAllVars,
 } from "./types";
 
 function App() {
@@ -35,6 +43,20 @@ function App() {
     onCompleted: () => refetch(),
   });
 
+  const [refreshAllRepos, { error: refreshError }] = useMutation<RefreshAllData, RefreshAllVars>(
+    REFRESH_ALL_REPOS,
+    {
+      // update cache instead of refetching
+      update(cache, { data }) {
+        if (!data) return;
+        cache.writeQuery<GetReposData, GetReposVars>({
+          query: GET_REPOS,
+          data: { trackedRepositories: data.refreshAllRepos },
+        });
+      },
+    },
+  );
+
   const repos = data?.trackedRepositories || [];
 
   const sortedRepos = [...repos].sort((a, b) => {
@@ -43,9 +65,9 @@ function App() {
     return bDate - aDate;
   });
 
-  const hasError = getReposError || addError || deleteError || markSeenError;
+  const hasError = getReposError || addError || deleteError || markSeenError || refreshError;
   const errorMessage = hasError
-    ? (getReposError || addError || deleteError || markSeenError)?.message
+    ? (getReposError || addError || deleteError || markSeenError || refreshError)?.message
     : null;
 
   const handleAdd = (url: string) => {
@@ -61,6 +83,10 @@ function App() {
     markSeen({ variables: { releaseId } });
   };
 
+  const handleRefreshAll = () => {
+    refreshAllRepos();
+  };
+
   return (
     <Container
       maxWidth="lg"
@@ -73,12 +99,7 @@ function App() {
       }}
     >
       <Header />
-      <SecondaryBar
-        onSubmit={handleAdd}
-        onRefreshAll={() => {
-          console.log("Refresh all clicked");
-        }}
-      />
+      <SecondaryBar onSubmit={handleAdd} onRefreshAll={handleRefreshAll} />
       {errorMessage && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {errorMessage}

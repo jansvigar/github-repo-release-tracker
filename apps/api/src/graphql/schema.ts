@@ -26,6 +26,7 @@ type TrackedRepository {
     addRepository(url: String!): TrackedRepository!
     deleteRepository(id: ID!): TrackedRepository!
     markReleaseSeen(releaseId: ID!): Release!
+    refreshAllRepos: [TrackedRepository!]!
     refreshRepo(id: ID!): TrackedRepository!
   }
 `;
