@@ -1,6 +1,6 @@
-import { Card, Chip, CardContent, Typography, Skeleton, Box, IconButton } from "@mui/material";
+import React from "react";
+import { Card, Chip, CardContent, Typography, Box, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CheckIcon from "@mui/icons-material/Check";
 
 interface RepoCardProps {
   repoName: string;
@@ -8,9 +8,7 @@ interface RepoCardProps {
   publishedDate: string;
   isNew: boolean;
   selected: boolean;
-  isLoading?: boolean;
   onSelect: () => void;
-  onMarkAsSeen: () => void;
   onDelete: () => void;
 }
 
@@ -20,13 +18,10 @@ export default function RepoCard({
   publishedDate,
   isNew,
   selected,
-  isLoading = false,
   onSelect,
-  onMarkAsSeen,
   onDelete,
 }: RepoCardProps) {
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (isLoading) return;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       onSelect();
@@ -36,19 +31,17 @@ export default function RepoCard({
   return (
     <Card
       role="button"
-      tabIndex={isLoading ? -1 : 0}
-      onClick={() => !isLoading && onSelect()}
+      tabIndex={0}
+      onClick={onSelect}
       onKeyDown={handleKeyDown}
       sx={{
         position: "relative",
         mb: 2,
-        cursor: isLoading ? "default" : "pointer",
-        pointerEvents: isLoading ? "none" : "auto",
+        cursor: "pointer",
         border: selected ? 2 : 1,
         borderColor: selected ? "primary.main" : "divider",
         boxShadow: selected ? 4 : 1,
         transition: "all 0.2s",
-        opacity: isLoading ? 0.7 : 1,
         outline: selected ? "2px solid" : "none",
         "&:focus": {
           outline: "2px solid",
@@ -56,7 +49,7 @@ export default function RepoCard({
         },
       }}
     >
-      {isNew && !isLoading && (
+      {isNew && (
         <Chip
           label="NEW"
           color="error"
@@ -75,25 +68,12 @@ export default function RepoCard({
           {repoName}
         </Typography>
 
-        {isLoading ? (
-          <>
-            <Skeleton width="40%" variant="text" sx={{ mt: 0.5 }} />
-            <Skeleton width="30%" variant="text" sx={{ mt: 0.25 }} />
-          </>
-        ) : (
-          <>
-            <Typography variant="subtitle2" sx={{ mt: 0.5, fontStyle: "italic" }}>
-              {tagName}
-            </Typography>
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: "block", mt: 0.25 }}
-            >
-              {new Date(publishedDate).toLocaleDateString()}
-            </Typography>
-          </>
-        )}
+        <Typography variant="subtitle2" sx={{ mt: 0.5, fontStyle: "italic" }}>
+          {tagName}
+        </Typography>
+        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>
+          {new Date(publishedDate).toLocaleDateString()}
+        </Typography>
       </CardContent>
 
       <Box
@@ -105,38 +85,16 @@ export default function RepoCard({
           gap: 1,
         }}
       >
-        {isLoading ? (
-          <>
-            <Skeleton variant="circular" width={32} height={32} />
-            <Skeleton variant="circular" width={32} height={32} />
-          </>
-        ) : (
-          <>
-            {isNew && (
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMarkAsSeen();
-                }}
-                aria-label="Mark as seen"
-              >
-                <CheckIcon fontSize="small" />
-              </IconButton>
-            )}
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              aria-label="Delete repository"
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </>
-        )}
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          aria-label="Delete repository"
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
       </Box>
     </Card>
   );

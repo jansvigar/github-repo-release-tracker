@@ -1,19 +1,10 @@
+import { Repository } from "@/types";
 import { Card, CardContent, Typography, Link, Stack, Box } from "@mui/material";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface RepoDetailsProps {
-  repo: {
-    id: number;
-    owner: string;
-    name: string;
-    latestRelease: {
-      id: number;
-      htmlUrl: string;
-      tagName: string;
-      publishedAt: string;
-      body?: string;
-      seen: boolean;
-    } | null;
-  } | null;
+  repo: Repository | null;
 }
 
 export default function RepoDetails({ repo }: RepoDetailsProps) {
@@ -49,7 +40,9 @@ export default function RepoDetails({ repo }: RepoDetailsProps) {
           </Link>
         </Stack>
         <Box sx={{ mt: 2 }}>
-          <Typography variant="body2">{rel.body ?? "No description available."}</Typography>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {rel.body || "No description available."}
+          </ReactMarkdown>
         </Box>
       </CardContent>
     </Card>

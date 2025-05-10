@@ -1,84 +1,37 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState } from "react";
 import { Box, useTheme, useMediaQuery, Drawer, Typography } from "@mui/material";
 import RepoCard from "@/components/RepoCard";
 import RepoDetails from "@/components/RepoDetails";
+import { Repository } from "@/types";
 
-interface Repo {
-  id: number;
-  owner: string;
-  name: string;
-  seen: boolean;
-  latestRelease: {
-    id: number;
-    htmlUrl: string;
-    tagName: string;
-    publishedAt: string;
-    body?: string;
-    seen: boolean;
-  } | null;
+interface RepoSectionProps {
+  repos: Repository[];
+  onDelete: (id: number) => void;
+  onCardClick: (repoId: string, releaseId?: string) => void;
 }
 
-export default function RepoSection() {
-  const repos: Repo[] = useMemo(
-    () => [
-      {
-        id: 1,
-        owner: "vercel",
-        name: "next.js",
-        seen: false,
-        latestRelease: {
-          id: 1,
-          htmlUrl: "https://github.com/vercel/next.js/releases/tag/v12.3.4",
-          tagName: "v12.3.4",
-          seen: false,
-          publishedAt: "2025-05-10T12:34:56Z",
-        },
-      },
-      {
-        id: 2,
-        owner: "facebook",
-        name: "react",
-        seen: true,
-        latestRelease: {
-          id: 2,
-          htmlUrl: "https://github.com/facebook/react/releases/tag/v19.3.4",
-          tagName: "v19.3.4",
-          seen: true,
-          publishedAt: "2025-02-01T12:34:56Z",
-        },
-      },
-    ],
-    [],
-  );
-
+export default function RepoSection({ repos, onDelete, onCardClick }: RepoSectionProps) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const selectedRepo = useMemo(
-    () => repos.find((r) => r.id === selectedId) ?? null,
-    [repos, selectedId],
-  );
+  const selectedRepo = repos.find((r) => r.id === selectedId) ?? null;
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const handleSelect = useCallback((id: number) => {
-    setSelectedId(id);
-  }, []);
+  const handleSelect = (repoId: number, releaseId?: number) => {
+    setSelectedId(repoId);
+    onCardClick(repoId.toString(), releaseId?.toString());
+  };
 
-  const handleCloseDetails = useCallback(() => {
+  const handleCloseDetails = () => {
     setSelectedId(null);
-  }, []);
+  };
 
-  const handleMarkSeen = useCallback((repoId: number, releaseId: number) => {
-    console.log("mark seen", repoId, releaseId);
-  }, []);
-
-  const handleDelete = useCallback(
-    (repoId: number) => {
-      console.log("delete", repoId);
-      if (repoId === selectedId) setSelectedId(null);
-    },
-    [selectedId],
-  );
+  const handleDelete = (repoId: number) => {
+    onDelete(repoId);
+    if (selectedRepo?.id === repoId) {
+      setSelectedId(null);
+    }
+  };
 
   return (
     <Box
@@ -122,11 +75,7 @@ export default function RepoSection() {
               publishedDate={repo.latestRelease ? repo.latestRelease.publishedAt : ""}
               isNew={!repo.seen}
               selected={repo.id === selectedId}
-              isLoading={false}
-              onSelect={() => handleSelect(repo.id)}
-              onMarkAsSeen={() =>
-                repo.latestRelease && handleMarkSeen(repo.id, repo.latestRelease.id)
-              }
+              onSelect={() => handleSelect(repo.id, repo.latestRelease?.id)}
               onDelete={() => handleDelete(repo.id)}
             />
           ))}

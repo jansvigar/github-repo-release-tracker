@@ -1,5 +1,7 @@
 export const schema = `
-  type TrackedRepository {
+scalar DateTime  
+
+type TrackedRepository {
     id: ID!
     owner: String!
     name: String!
@@ -10,8 +12,9 @@ export const schema = `
   type Release {
     id: ID!
     tagName: String!
-    publishedAt: String!
+    publishedAt: DateTime!
     htmlUrl: String!
+    body: String!
     seen: Boolean!
   }
 
@@ -21,6 +24,7 @@ export const schema = `
 
   type Mutation {
     addRepository(url: String!): TrackedRepository!
+    deleteRepository(id: ID!): TrackedRepository!
     markReleaseSeen(releaseId: ID!): Release!
     refreshRepo(id: ID!): TrackedRepository!
   }

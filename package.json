@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev:web": "pnpm --filter \"@ghtracker/web\" dev",
+    "dev:api": "pnpm --filter \"@ghtracker/api\" dev",
     "lint": "pnpm -r --stream lint",
     "type-check": "pnpm -r --stream type-check",
     "format": "pnpm -r --stream format",

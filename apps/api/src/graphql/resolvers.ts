@@ -2,7 +2,7 @@ import { IResolvers } from "mercurius";
 import db from "../db/client.js";
 import { trackedRepositories, releases } from "../db/schema.js";
 import { Octokit } from "@octokit/rest";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 const octo = new Octokit({ auth: process.env.GITHUB_PAT });
 
@@ -12,6 +12,7 @@ async function fetchLatest(owner: string, repo: string) {
     tagName: data.tag_name,
     publishedAt: data.published_at ? new Date(data.published_at) : null,
     htmlUrl: data.html_url,
+    body: data.body ?? "",
   };
 }
 
@@ -21,13 +22,61 @@ export const resolvers: IResolvers = {
   },
 
   Mutation: {
-    addRepository: async (_, { url }: { url: string }) => {
-      const [, owner, name] = url.match(/github\.com\/([^/]+)\/([^/]+?)(?:\.git|\/?$)/)!;
-      const [repo] = await db
+    addRepository: async (_ctx, { url }: { url: string }) => {
+      const match = url.match(/github\.com\/([^/]+)\/([^/]+?)(?:\.git|\/?$)/);
+      if (!match) {
+        throw new Error("Invalid GitHub URL. Expected format: https://github.com/<owner>/<repo>");
+      }
+      const [, owner, name] = match;
+
+      let latest;
+      try {
+        latest = await fetchLatest(owner, name);
+      } catch (err) {
+        throw new Error(
+          `Could not fetch latest release: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+
+      const [inserted] = await db
         .insert(trackedRepositories)
         .values({ owner, name })
         .onConflictDoNothing()
         .returning();
+
+      let repo;
+      if (inserted) {
+        repo = inserted;
+      } else {
+        const existing = await db.query.trackedRepositories.findFirst({
+          where: and(eq(trackedRepositories.owner, owner), eq(trackedRepositories.name, name)),
+        });
+        if (!existing) {
+          throw new Error("Failed to add or find repository");
+        }
+        repo = existing;
+      }
+
+      await db
+        .insert(releases)
+        .values({ repositoryId: repo.id, ...latest })
+        .onConflictDoNothing();
+
+      return repo;
+    },
+
+    deleteRepository: async (_ctx, { id }: { id: number }) => {
+      const repo = await db.query.trackedRepositories.findFirst({
+        where: eq(trackedRepositories.id, id),
+      });
+      if (!repo) {
+        throw new Error(`Repository with id=${id} not found`);
+      }
+
+      await db.delete(releases).where(eq(releases.repositoryId, id));
+
+      await db.delete(trackedRepositories).where(eq(trackedRepositories.id, id));
+
       return repo;
     },
 

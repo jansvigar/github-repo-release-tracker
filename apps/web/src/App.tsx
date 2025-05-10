@@ -1,9 +1,66 @@
-import { Container } from "@mui/material";
+import { Alert, Container } from "@mui/material";
+import { useMutation, useQuery } from "@apollo/client";
+
 import Header from "@/components/Header";
 import SecondaryBar from "@/components/SecondaryBar";
 import RepoSection from "@/components/RepoSection";
+import { ADD_REPO, DELETE_REPO, GET_REPOS, MARK_SEEN } from "@/graphql/operations";
+import {
+  AddRepoData,
+  AddRepoVars,
+  DeleteRepoData,
+  DeleteRepoVars,
+  GetReposData,
+  GetReposVars,
+  MarkSeenData,
+  MarkSeenVars,
+} from "./types";
 
 function App() {
+  const { data, error: getReposError, refetch } = useQuery<GetReposData, GetReposVars>(GET_REPOS);
+  const [addRepo, { error: addError }] = useMutation<AddRepoData, AddRepoVars>(ADD_REPO, {
+    onCompleted: () => {
+      refetch();
+    },
+  });
+
+  const [deleteRepo, { error: deleteError }] = useMutation<DeleteRepoData, DeleteRepoVars>(
+    DELETE_REPO,
+    {
+      onCompleted: () => refetch(),
+    },
+  );
+
+  const [markSeen, { error: markSeenError }] = useMutation<MarkSeenData, MarkSeenVars>(MARK_SEEN, {
+    onCompleted: () => refetch(),
+  });
+
+  const repos = data?.trackedRepositories || [];
+
+  const sortedRepos = [...repos].sort((a, b) => {
+    const aDate = a.latestRelease ? new Date(a.latestRelease.publishedAt).getTime() : 0;
+    const bDate = b.latestRelease ? new Date(b.latestRelease.publishedAt).getTime() : 0;
+    return bDate - aDate;
+  });
+
+  const hasError = getReposError || addError || deleteError || markSeenError;
+  const errorMessage = hasError
+    ? (getReposError || addError || deleteError || markSeenError)?.message
+    : null;
+
+  const handleAdd = (url: string) => {
+    addRepo({ variables: { url } });
+  };
+
+  const handleDelete = (id: number) => {
+    deleteRepo({ variables: { id: id.toString() } });
+  };
+
+  const handleCardClick = (repoId: string, releaseId?: string) => {
+    if (!releaseId) return;
+    markSeen({ variables: { releaseId } });
+  };
+
   return (
     <Container
       maxWidth="lg"
@@ -17,14 +74,17 @@ function App() {
     >
       <Header />
       <SecondaryBar
-        onSubmit={(url) => {
-          console.log("URL submitted:", url);
-        }}
+        onSubmit={handleAdd}
         onRefreshAll={() => {
           console.log("Refresh all clicked");
         }}
       />
-      <RepoSection />
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {errorMessage}
+        </Alert>
+      )}
+      <RepoSection repos={sortedRepos} onDelete={handleDelete} onCardClick={handleCardClick} />
     </Container>
   );
 }

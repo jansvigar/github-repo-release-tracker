@@ -1,5 +1,6 @@
 import Fastify, { FastifyInstance } from "fastify";
 import mercurius from "mercurius";
+import { GraphQLDateTime } from "graphql-scalars";
 import { schema } from "./graphql/schema.js";
 import { resolvers } from "./graphql/resolvers.js";
 import "dotenv/config";
@@ -21,8 +22,12 @@ export const fastify: FastifyInstance = Fastify({
 
 fastify.register(mercurius, {
   schema,
-  resolvers,
+  resolvers: {
+    DateTime: GraphQLDateTime,
+    ...resolvers,
+  },
   graphiql: process.env.NODE_ENV !== "production",
+  prefix: "/api",
 });
 
 fastify.get("/health-check", async (request, reply) => {
