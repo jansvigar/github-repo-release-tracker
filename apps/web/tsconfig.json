@@ -1,4 +1,10 @@
 {
   "extends": "@ghtracker/config/tsconfig",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "outDir": "dist",
+    "module": "ES2022",
+    "moduleResolution": "bundler"
+  },
   "include": ["src/**/*"]
 }
